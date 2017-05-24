@@ -305,6 +305,15 @@ namespace Novacode
                 }
             }
         }
+
+        public void SetColumn(int number)
+        {
+            XElement body = mainDoc.Root.Element(XName.Get("body", w.NamespaceName));
+            XElement sectPr = body.Element(XName.Get("sectPr", w.NamespaceName));
+            XElement col = sectPr?.Element(XName.Get("cols", w.NamespaceName));            
+            col.SetAttributeValue(XName.Get("num", w.NamespaceName), number);
+        }
+
         /// <summary>
         /// Returns true if any editing restrictions are imposed on this document.
         /// </summary>
