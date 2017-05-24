@@ -2979,6 +2979,39 @@ namespace Novacode
         }
 
         /// <summary>
+        /// Add an Image into this document from a Stream.
+        /// </summary>
+        /// <param name="stream">A Stream stream.</param>
+        /// <param name="rId">Relation ID</param>
+        /// <param name="fileName">Image file name which will added into this doc</param>
+        /// <param name="contentType">MIME type of image.</param>
+        /// <returns>An Image file.</returns>
+        /// <example>
+        /// Add an Image into a document using a Stream.
+        /// <code>
+        /// // Open a FileStream fs to an Image.
+        /// using (FileStream fs = new FileStream(@"C:\Example\Image.jpg", FileMode.Open))
+        /// {
+        ///     // Load a document.
+        ///     using (DocX document = DocX.Load(@"C:\Example\Test.docx"))
+        ///     {
+        ///         // Add an Image from a filestream fs.
+        ///         document.AddImage(fs,"rid16","image1.jpg");
+        ///
+        ///         // Save all changes made to this document.
+        ///         document.Save();
+        ///     }// Release this document from memory.
+        /// }
+        /// </code>
+        /// </example>
+        /// <seealso cref="AddImage(string, string)"/>
+        /// <seealso cref="Paragraph.InsertPicture"/>
+        public Image AddImage(Stream stream, string rId, string fileName, string contentType = "image/jpeg")
+        {
+            return AddImageWithRid(stream, rId, fileName, contentType);
+        }
+        
+        /// <summary>
         /// Adds a hyperlink to a document and creates a Paragraph which uses it.
         /// </summary>
         /// <param name="text">The text as displayed by the hyperlink.</param>
@@ -3430,6 +3463,160 @@ namespace Novacode
                     CopyStream(newImageStream, stream, bufferSize: 4096);
                 } // Close the Stream to the new image.
             } // Close the Stream to the new image part.
+
+            return new Image(this, rel);
+        }
+
+        internal Image AddImageWithRid(object o, string rId, string fileName, string contentType = "image/jpeg")
+        {
+            // Open a Stream to the new image being added.
+            Stream newImageStream;
+            if (o is string)
+                newImageStream = new FileStream(o as string, FileMode.Open, FileAccess.Read);
+            else
+                newImageStream = o as Stream;
+
+            // Get all image parts in word\document.xml
+            PackagePartCollection packagePartCollection = package.GetParts();
+
+            // Cache Uri.ToString which is expensive to be used in two loops
+            var parts = packagePartCollection.Select(x => new
+            {
+                UriString = x.Uri.ToString(),
+                Part = x
+            }).ToList();
+
+            var partLookup = parts.ToDictionary(x => x.UriString, x => x.Part, StringComparer.Ordinal);
+
+            // Gather results manually to minimize closure allocation overhead
+            List<PackagePart> imageParts = new List<PackagePart>();
+            foreach (var ir in mainPart.GetRelationshipsByType(relationshipImage))
+            {
+                var targetUri = ir.TargetUri.ToString();
+                PackagePart part;
+                if (partLookup.TryGetValue(targetUri, out part))
+                {
+                    imageParts.Add(part);
+                }
+            }
+
+            IEnumerable<PackagePart> relsParts = parts
+                .Where(
+                    part =>
+                        part.Part.ContentType.Equals(contentTypeApplicationRelationShipXml, StringComparison.Ordinal) &&
+                        part.UriString.IndexOf("/word/", StringComparison.Ordinal) > -1)
+                .Select(part => part.Part);
+
+            XName xNameTarget = XName.Get("Target");
+            XName xNameTargetMode = XName.Get("TargetMode");
+
+            foreach (PackagePart relsPart in relsParts)
+            {
+                XDocument relsPartContent;
+                using (TextReader tr = new StreamReader(relsPart.GetStream(FileMode.Open, FileAccess.Read)))
+                {
+                    relsPartContent = XDocument.Load(tr);
+                }
+
+                IEnumerable<XElement> imageRelationships = relsPartContent.Root.Elements()
+                    .Where(imageRel => imageRel.Attribute(XName.Get("Type")).Value.Equals(relationshipImage));
+
+                foreach (XElement imageRelationship in imageRelationships)
+                {
+                    XAttribute attribute = imageRelationship.Attribute(xNameTarget);
+                    if (attribute != null)
+                    {
+                        string targetMode = string.Empty;
+
+                        XAttribute targetModeAttibute = imageRelationship.Attribute(xNameTargetMode);
+                        if (targetModeAttibute != null)
+                        {
+                            targetMode = targetModeAttibute.Value;
+                        }
+
+                        if (!targetMode.Equals("External"))
+                        {
+                            string imagePartUri = Path.Combine(Path.GetDirectoryName(relsPart.Uri.ToString()),
+                                attribute.Value);
+                            imagePartUri = Path.GetFullPath(imagePartUri.Replace("\\_rels", string.Empty));
+                            imagePartUri = imagePartUri.Replace(Path.GetFullPath("\\"), string.Empty).Replace("\\", "/");
+
+                            if (!imagePartUri.StartsWith("/"))
+                            {
+                                imagePartUri = "/" + imagePartUri;
+                            }
+
+                            PackagePart imagePart = package.GetPart(new Uri(imagePartUri, UriKind.Relative));
+                            imageParts.Add(imagePart);
+                        }
+                    }
+                }
+            }
+
+            // Loop through each image part in this document.
+            foreach (PackagePart pp in imageParts)
+            {
+                // Get the image object for this image part
+                // Open a tempory Stream to this image part.
+                using (Stream tempStream = pp.GetStream(FileMode.Open, FileAccess.Read))
+                {
+                    // Compare this image to the new image being added.
+                    if (HelperFunctions.IsSameFile(tempStream, newImageStream))
+                    {
+                        // Return the Image object
+                        PackageRelationship relationship = mainPart.GetRelationshipsByType(relationshipImage)
+                            .First(x => x.TargetUri == pp.Uri);
+
+                        return new Image(this, relationship);
+                    }
+                }
+            }
+
+            string imgPartUriPath = string.Empty;
+            string extension = contentType.Substring(contentType.LastIndexOf("/") + 1);
+
+            imgPartUriPath = string.Format
+            (
+                "/word/media/{0}.{1}",
+                fileName, // The unique part.
+                extension
+            );
+
+            PackagePart img;
+
+            if (!package.PartExists(new Uri(imgPartUriPath, UriKind.Relative)))
+            {
+                // Create a new image part.
+
+                // We are now guareenteed that imgPartUriPath is unique.
+                img = package.CreatePart(new Uri(imgPartUriPath, UriKind.Relative), contentType, CompressionOption.Normal);
+
+                // Open a Stream to the newly created Image part.
+                using (Stream stream = new PackagePartStream(img.GetStream(FileMode.Create, FileAccess.Write)))
+                {
+                    // Using the Stream to the real image, copy this streams data into the newly create Image part.
+                    using (newImageStream)
+                    {
+                        CopyStream(newImageStream, stream, bufferSize: 4096);
+                    } // Close the Stream to the new image.
+                } // Close the Stream to the new image part.
+            }
+            else
+            {
+                img = package.GetPart(new Uri(imgPartUriPath, UriKind.Relative));
+            }
+
+            PackageRelationship rel;
+
+            if (!mainPart.RelationshipExists(rId))
+            {
+                // Create a new image relationship
+                rel = mainPart.CreateRelationship(img.Uri, TargetMode.Internal, relationshipImage, rId);
+            }
+            else
+            {
+                rel = mainPart.GetRelationship(rId);
+            }
 
             return new Image(this, rel);
         }
