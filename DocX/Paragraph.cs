@@ -1014,6 +1014,17 @@ namespace Novacode
             return p;
         }
 
+        public Paragraph AppendParagraph(Paragraph paragraph)
+        {
+            var elems = paragraph.Xml.Elements();
+            foreach (var item in elems)
+            {
+                Xml.Add(item);
+            }            
+            return this;
+        }
+
+
         /// <summary>
         /// Insert a page break before a Paragraph.
         /// </summary>
