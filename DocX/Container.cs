@@ -154,6 +154,16 @@ namespace Novacode
             return false;
         }
 
+        public List<Hyperlink> GetHyperLinks()
+        {
+            List<Hyperlink> hyperLinsk = new List<Hyperlink>();
+            List<Paragraph> paragraphs = GetParagraphs();
+            foreach (var pa in paragraphs)
+            {
+                hyperLinsk.AddRange(pa.Hyperlinks);
+            }
+            return hyperLinsk;
+        }
 
         public virtual List<Section> Sections
         {

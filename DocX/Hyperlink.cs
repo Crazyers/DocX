@@ -228,5 +228,15 @@ namespace Novacode
 
             catch (Exception e){throw e;}
         }
+
+        public XElement GetInstrText()
+        {
+            return this.instrText;
+        }
+
+        public void SetInstrText(XElement elem)
+        {
+            instrText = elem;
+        }
     }
 }
