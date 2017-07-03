@@ -17,6 +17,7 @@ namespace Novacode
     /// </summary>
     public class DocX : Container, IDisposable
     {
+        /*
         #region Namespaces
         static internal XNamespace w = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
         static internal XNamespace rel = "http://schemas.openxmlformats.org/package/2006/relationships";
@@ -33,6 +34,42 @@ namespace Novacode
         static internal XNamespace v = "urn:schemas-microsoft-com:vml";
 
         internal static XNamespace n = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering";
+        #endregion
+
+        internal const string relationshipImage = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
+        internal const string contentTypeApplicationRelationShipXml = "application/vnd.openxmlformats-package.relationships+xml";
+
+        */
+
+        #region Namespaces
+        static internal XNamespace w = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+        static internal XNamespace rel = "http://schemas.openxmlformats.org/package/2006/relationships";
+
+        static internal XNamespace r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+        static internal XNamespace m = "http://schemas.openxmlformats.org/officeDocument/2006/math";
+        static internal XNamespace customPropertiesSchema = "http://schemas.openxmlformats.org/officeDocument/2006/custom-properties";
+        static internal XNamespace customVTypesSchema = "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
+
+        static internal XNamespace wp = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
+        static internal XNamespace a = "http://schemas.openxmlformats.org/drawingml/2006/main";
+        static internal XNamespace c = "http://schemas.openxmlformats.org/drawingml/2006/chart";
+
+        static internal XNamespace v = "urn:schemas-microsoft-com:vml";
+
+        internal static XNamespace n = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering";
+
+        internal static XNamespace wpc = "http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas";
+        internal static XNamespace mc = "http://schemas.openxmlformats.org/markup-compatibility/2006";
+        internal static XNamespace o = "urn:schemas-microsoft-com:office:office";
+        internal static XNamespace wp14 = "http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing";
+        internal static XNamespace w10 = "urn:schemas-microsoft-com:office:word";
+        internal static XNamespace w14 = "http://schemas.microsoft.com/office/word/2010/wordml";
+        internal static XNamespace w15 = "http://schemas.microsoft.com/office/word/2012/wordml";
+        internal static XNamespace wpg = "http://schemas.microsoft.com/office/word/2010/wordprocessingGroup";
+        internal static XNamespace wpi = "http://schemas.microsoft.com/office/word/2010/wordprocessingInk";
+        internal static XNamespace wne = "http://schemas.microsoft.com/office/word/2006/wordml";
+        internal static XNamespace wps = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
+
         #endregion
 
         internal const string relationshipImage = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image";
