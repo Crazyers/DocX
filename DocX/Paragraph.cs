@@ -2832,6 +2832,43 @@ namespace Novacode
             }
         }
 
+        internal void ApplyMathFormattingProperty(XName textFormatPropName, string value, object content)
+        {
+            var oMathElemQuery = from p in Xml.Descendants() where p.Name.LocalName == "oMath" select p;
+            var oMathList = oMathElemQuery.ToList();
+
+            foreach (var oMathElem in oMathList)
+            {
+                var rPrQuery = from p in oMathElem.Descendants() where p.Name.LocalName == "rPr" select p;
+                var rPrList = rPrQuery.ToList();
+
+                if (rPrList.Count > 0)
+                {
+                    foreach (var rPr in rPrList)
+                    {
+                        var formatPropertyQuery = from q in rPr.Descendants() where q.Name.LocalName == textFormatPropName.LocalName select q;
+                        var formatPropertyList = formatPropertyQuery.ToList();
+                        foreach (var el2 in formatPropertyList)
+                        {
+                            var attr = el2.Attribute(((XAttribute)content).Name);
+                            if (attr != null)
+                            {
+                                attr.Value = value;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            /* TODO: If we want to set font size property at those math elements whose formatting property is absent 
+            then we have to impliment code ro all math equation elemtns here. This code will set font size into 
+            those equations have already font size property.
+            */
+
+            return; 
+        }
+
+
         /// <summary>
         /// For use with Append() and AppendLine()
         /// </summary>
@@ -4477,7 +4514,25 @@ namespace Novacode
                 SpacingAfter(value);
             }
         }
+
+        public void SetMathFontSize(double fontSize)
+        {
+            double temp = fontSize * 2;
+
+            if (temp - (int)temp == 0)
+            {
+                if (!(fontSize > 0 && fontSize < 1639))
+                    throw new ArgumentException("Size", "Value must be in the range 0 - 1638");
+            }
+            else
+                throw new ArgumentException("Size", "Value must be either a whole or half number, examples: 32, 32.5");
+
+            ApplyMathFormattingProperty(XName.Get("sz", DocX.w.NamespaceName), temp.ToString(), new XAttribute(XName.Get("val", DocX.w.NamespaceName), fontSize * 2));
+            ApplyMathFormattingProperty(XName.Get("szCs", DocX.w.NamespaceName), temp.ToString(), new XAttribute(XName.Get("val", DocX.w.NamespaceName), fontSize * 2));
+        }
     }
+
+    #region Other Classes
 
     public class Run : DocXElement
     {
@@ -4740,4 +4795,6 @@ namespace Novacode
             }
         }
     }
+
+    #endregion
 }
