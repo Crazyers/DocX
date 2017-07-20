@@ -2848,12 +2848,23 @@ namespace Novacode
                     {
                         var formatPropertyQuery = from q in rPr.Descendants() where q.Name.LocalName == textFormatPropName.LocalName select q;
                         var formatPropertyList = formatPropertyQuery.ToList();
+
+                        if(formatPropertyList.Count == 0)
+                        {
+                            rPr.AddFirst(new XElement(XName.Get(textFormatPropName.LocalName, DocX.w.NamespaceName)));
+                            var sz = rPr.Element(XName.Get(textFormatPropName.LocalName, DocX.w.NamespaceName));
+                            formatPropertyList.Add(sz);
+                        }                        
+
                         foreach (var el2 in formatPropertyList)
                         {
-                            var attr = el2.Attribute(((XAttribute)content).Name);
-                            if (attr != null)
+                            if (el2.Attribute(((XAttribute)(content)).Name) == null)
                             {
-                                attr.Value = value;
+                                el2.Add(content); 
+                            }
+                            else
+                            {
+                                el2.Attribute(((XAttribute)(content)).Name).Value = ((XAttribute)(content)).Value; 
                             }
                         }
                     }
