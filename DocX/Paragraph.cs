@@ -297,6 +297,91 @@ namespace Novacode
             get { return docProperties; }
         }
 
+        public List<string> GetAsciiFontName(bool isDistinct)
+        {
+            var usedFontList = new List<string>();
+
+            var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
+            foreach (var font in fontsList)
+            {
+                if (font != null)
+                {
+                    var fontName = font.Attribute(XName.Get("ascii", DocX.w.NamespaceName)).Value;
+                    usedFontList.Add(fontName);
+                }
+            }
+
+            if (isDistinct)
+            {
+                return usedFontList.Distinct().ToList();
+            }
+
+            return usedFontList;
+        }
+
+        public List<string> GethAnsiFontName(bool isDistinct)
+        {
+            var usedFontList = new List<string>();
+
+            var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
+            foreach (var font in fontsList)
+            {
+                if (font != null)
+                {
+                    var fontName = font.Attribute(XName.Get("hAnsi", DocX.w.NamespaceName)).Value;
+                    usedFontList.Add(fontName);
+                }
+            }
+            if (isDistinct)
+            {
+                return usedFontList.Distinct().ToList();
+            }
+
+            return usedFontList;
+        }
+
+        public List<string> GetCsFontName(bool isDistinct)
+        {
+            var usedFontList = new List<string>();
+
+            var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
+            foreach (var font in fontsList)
+            {
+                if (font != null)
+                {
+                    var fontName = font.Attribute(XName.Get("cs", DocX.w.NamespaceName)).Value;
+                    usedFontList.Add(fontName);
+                }
+            }
+            if (isDistinct)
+            {
+                return usedFontList.Distinct().ToList();
+            }
+
+            return usedFontList;
+        }
+
+        public List<string> GetEastAsiaName(bool isDistinct)
+        {
+            var usedFontList = new List<string>();
+
+            var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
+            foreach (var font in fontsList)
+            {
+                if (font != null)
+            {
+                var fontName = font.Attribute(XName.Get("eastAsia", DocX.w.NamespaceName)).Value;
+                    usedFontList.Add(fontName);
+                }
+            }
+            if (isDistinct)
+            {
+                return usedFontList.Distinct().ToList();
+            }
+
+            return usedFontList;
+        }
+
         internal Paragraph(DocX document, XElement xml, int startIndex, ContainerType parent = ContainerType.None)
             : base(document, xml)
         {
