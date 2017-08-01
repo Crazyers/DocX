@@ -304,9 +304,10 @@ namespace Novacode
             var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
             foreach (var font in fontsList)
             {
-                if (font != null)
+                var attr = font.Attribute(XName.Get("ascii", DocX.w.NamespaceName));
+                if (attr != null)
                 {
-                    var fontName = font.Attribute(XName.Get("ascii", DocX.w.NamespaceName)).Value;
+                    var fontName = attr.Value;
                     usedFontList.Add(fontName);
                 }
             }
@@ -326,11 +327,12 @@ namespace Novacode
             var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
             foreach (var font in fontsList)
             {
-                if (font != null)
+                var attr = font.Attribute(XName.Get("hAnsi", DocX.w.NamespaceName));
+                if(attr != null)
                 {
-                    var fontName = font.Attribute(XName.Get("hAnsi", DocX.w.NamespaceName)).Value;
+                    var fontName = attr.Value;
                     usedFontList.Add(fontName);
-                }
+                }                
             }
             if (isDistinct)
             {
@@ -346,12 +348,13 @@ namespace Novacode
 
             var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
             foreach (var font in fontsList)
-            {
-                if (font != null)
+            {                
+                var attr = font.Attribute(XName.Get("cs", DocX.w.NamespaceName));
+                if(attr != null)
                 {
-                    var fontName = font.Attribute(XName.Get("cs", DocX.w.NamespaceName)).Value;
+                    var fontName = attr.Value;
                     usedFontList.Add(fontName);
-                }
+                }                
             }
             if (isDistinct)
             {
@@ -368,9 +371,10 @@ namespace Novacode
             var fontsList = Xml.Descendants(XName.Get("rFonts", DocX.w.NamespaceName));
             foreach (var font in fontsList)
             {
-                if (font != null)
-            {
-                var fontName = font.Attribute(XName.Get("eastAsia", DocX.w.NamespaceName)).Value;
+                var attr = font.Attribute(XName.Get("eastAsia", DocX.w.NamespaceName));
+                if (attr != null)
+                {
+                    var fontName = attr.Value;
                     usedFontList.Add(fontName);
                 }
             }
