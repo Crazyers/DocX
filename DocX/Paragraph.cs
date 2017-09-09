@@ -386,6 +386,20 @@ namespace Novacode
             return usedFontList;
         }
 
+        public float GetFontSize()
+        {
+            var fontSizeList = Xml.Descendants(XName.Get("sz", DocX.w.NamespaceName));
+            foreach (var font in fontSizeList)
+            {
+                var attr = font.Attribute(XName.Get("val", DocX.w.NamespaceName));
+                if (attr != null)
+                {
+                    return float.Parse(attr.Value)/(float)2;
+                }
+            }         
+            return -1;
+        }
+
         internal Paragraph(DocX document, XElement xml, int startIndex, ContainerType parent = ContainerType.None)
             : base(document, xml)
         {
